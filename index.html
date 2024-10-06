@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书网红成长之路</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #ff69b4;
+        }
+        #stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        #followerGain {
+            font-size: 14px;
+            color: #4caf50;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #ff69b4;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #ff1493;
+        }
+        button:disabled {
+            background-color: #696969;
+            cursor: not-allowed;
+        }
+        #upgrades {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .upgrade-item {
+            margin: 10px;
+            text-align: center;
+            width: 200px;
+        }
+        #progressBar {
+            width: 100%;
+            background-color: #333333;
+            margin-top: 20px;
+        }
+        #progress {
+            width: 0;
+            height: 30px;
+            background-color: #ff69b4;
+            text-align: center;
+            line-height: 30px;
+            color: #1a1a1a;
+            transition: width 0.5s;
+        }
+        #log {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333333;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        #achievements {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .achievement {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #333333;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        .achievement.unlocked {
+            background-color: #ff69b4;
+            color: #1a1a1a;
+        }
+        #eventPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2a2a2a;
+            border: 2px solid #ff69b4;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            display: none;
+        }
+        #expBar {
+            width: 100%;
+            height: 20px;
+            background-color: #333333;
+            margin-top: 10px;
+            position: relative;
+        }
+        #expProgress {
+            width: 0;
+            height: 100%;
+            background-color: #4caf50;
+            transition: width 0.5s;
+        }
+        #expText {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 20px;
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+    <h1>小红书网红成长之路</h1>
+    <div id="stats">
+        <div class="stat-item">
+            <div>粉丝数: <span id="followers">0</span></div>
+            <div id="followerGain"></div>
+        </div>
+        <div class="stat-item">
+            <div>金钱: ¥<span id="money">0</span></div>
+            <div>每秒收入: ¥<span id="incomePerSecond">0</span></div>
+        </div>
+        <div class="stat-item">
+            <div>等级: <span id="level">1</span></div>
+        </div>
+    </div>
+    <div id="expBar">
+        <div id="expProgress"></div>
+        <div id="expText">0 / 100 XP</div>
+    </div>
+    <button id="postButton">发布帖子</button>
+    <div id="upgrades">
+        <div class="upgrade-item">
+            <button id="upgradeCreativityButton">提升创意 (¥<span id="creativityCost">50</span>)</button>
+            <div>等级: <span id="creativityLevel">1</span></div>
+            <div>新增粉丝: +<span id="creativityEffect">5</span></div>
+        </div>
+        <div class="upgrade-item">
+            <button id="upgradeAestheticsButton">提升审美 (¥<span id="aestheticsCost">100</span>)</button>
+            <div>等级: <span id="aestheticsLevel">1</span></div>
+            <div>粉丝增益: +<span id="aestheticsEffect">10</span>%</div>
+        </div>
+        <div class="upgrade-item">
+            <button id="upgradeBusinessButton">提升商业 (¥<span id="businessCost">200</span>)</button>
+            <div>等级: <span id="businessLevel">1</span></div>
+            <div>收入增益: +<span id="businessEffect">10</span>%</div>
+        </div>
+        <div class="upgrade-item">
+            <button id="upgradeSkillButton">提升技巧 (¥<span id="skillCost">125</span>)</button>
+            <div>等级: <span id="skillLevel">1</span></div>
+            <div>经验增益: +<span id="skillEffect">10</span>%</div>
+        </div>
+        <div class="upgrade-item">
+            <button id="upgradeNetworkButton">提升人脉 (¥<span id="networkCost">300</span>)</button>
+            <div>等级: <span id="networkLevel">1</span></div>
+            <div>每秒粉丝: +<span id="networkEffect">1</span></div>
+        </div>
+        <div class="upgrade-item">
+            <button id="upgradeFinanceButton">提升金融 (¥<span id="financeCost">500</span>)</button>
+            <div>等级: <span id="financeLevel">1</span></div>
+            <div>复利率: +<span id="financeEffect">1</span>%</div>
+        </div>
+    </div>
+    <div id="progressBar">
+        <div id="progress">0%</div>
+    </div>
+    <div id="log"></div>
+    <div id="achievements"></div>
+    <div id="eventPopup">
+        <h3 id="eventTitle"></h3>
+        <p id="eventDescription"></p>
+        <button id="eventButton">确定</button>
+    </div>
+
+    <script>
+        let followers = 0;
+        let money = 0;
+        let level = 1;
+        let exp = 0;
+        let expToNextLevel = 100;
+        let creativityLevel = 1;
+        let aestheticsLevel = 1;
+        let businessLevel = 1;
+        let skillLevel = 1;
+        let networkLevel = 1;
+        let financeLevel = 1;
+        let creativityCost = 50;
+        let aestheticsCost = 100;
+        let businessCost = 200;
+        let skillCost = 125;
+        let networkCost = 300;
+        let financeCost = 500;
+        const goal = 100000000;
+
+        const followersElement = document.getElementById('followers');
+        const followerGainElement = document.getElementById('followerGain');
+        const moneyElement = document.getElementById('money');
+        const incomePerSecondElement = document.getElementById('incomePerSecond');
+        const levelElement = document.getElementById('level');
+        const postButton = document.getElementById('postButton');
+        const upgradeCreativityButton = document.getElementById('upgradeCreativityButton');
+        const upgradeAestheticsButton = document.getElementById('upgradeAestheticsButton');
+        const upgradeBusinessButton = document.getElementById('upgradeBusinessButton');
+        const upgradeSkillButton = document.getElementById('upgradeSkillButton');
+        const upgradeNetworkButton = document.getElementById('upgradeNetworkButton');
+        const upgradeFinanceButton = document.getElementById('upgradeFinanceButton');
+        const creativityCostElement = document.getElementById('creativityCost');
+        const aestheticsCostElement = document.getElementById('aestheticsCost');
+        const businessCostElement = document.getElementById('businessCost');
+        const skillCostElement = document.getElementById('skillCost');
+        const networkCostElement = document.getElementById('networkCost');
+        const financeCostElement = document.getElementById('financeCost');
+        const creativityLevelElement = document.getElementById('creativityLevel');
+        const aestheticsLevelElement = document.getElementById('aestheticsLevel');
+        const businessLevelElement = document.getElementById('businessLevel');
+        const skillLevelElement = document.getElementById('skillLevel');
+        const networkLevelElement = document.getElementById('networkLevel');
+        const financeLevelElement = document.getElementById('financeLevel');
+        const creativityEffectElement = document.getElementById('creativityEffect');
+        const aestheticsEffectElement = document.getElementById('aestheticsEffect');
+        const businessEffectElement = document.getElementById('businessEffect');
+        const skillEffectElement = document.getElementById('skillEffect');
+        const networkEffectElement = document.getElementById('networkEffect');
+        const financeEffectElement = document.getElementById('financeEffect');
+        const logElement = document.getElementById('log');
+        const progressElement = document.getElementById('progress');
+        const achievementsElement = document.getElementById('achievements');
+        const expProgressElement = document.getElementById('expProgress');
+        const expTextElement = document.getElementById('expText');
+
+        const eventPopup = document.getElementById('eventPopup');
+        const eventTitle = document.getElementById('eventTitle');
+        const eventDescription = document.getElementById('eventDescription');
+        const eventButton = document.getElementById('eventButton');
+
+        const achievements = [
+            { name: "初出茅庐", description: "获得100个粉丝", condition: () => followers >= 100, unlocked: false },
+            { name: "小有名气", description: "获得1,000个粉丝", condition: () => followers >= 1000, unlocked: false },
+            { name: "网红新秀", description: "获得10,000个粉丝", condition: () => followers >= 10000, unlocked: false },
+            { name: "人气爆棚", description: "获得100,000个粉丝", condition: () => followers >= 100000, unlocked: false },
+            { name: "顶级网红", description: "获得1,000,000个粉丝", condition: () => followers >= 1000000, unlocked: false },
+            { name: "百万富翁", description: "累积1,000,000元", condition: () => money >= 1000000, unlocked: false },
+            { name: "创意大师", description: "将创意等级提升到10级", condition: () => creativityLevel >= 10, unlocked: false },
+            { name: "审美达人", description: "将审美等级提升到10级", condition: () => aestheticsLevel >= 10, unlocked: false },
+            { name: "商业奇才", description: "将商业等级提升到10级", condition: () => businessLevel >= 10, unlocked: false },
+            { name: "技巧精通", description: "将技巧等级提升到10级", condition: () => skillLevel >= 10, unlocked: false },
+            { name: "人脉王", description: "将人脉等级提升到10级", condition: () => networkLevel >= 10, unlocked: false },
+            { name: "金融高手", description: "将金融等级提升到10级", condition: () => financeLevel >= 10, unlocked: false }
+        ];
+
+        function updateDisplay() {
+            followersElement.textContent = followers.toLocaleString();
+            moneyElement.textContent = money.toLocaleString();
+            levelElement.textContent = level;
+            creativityCostElement.textContent = creativityCost.toLocaleString();
+            aestheticsCostElement.textContent = aestheticsCost.toLocaleString();
+            businessCostElement.textContent = businessCost.toLocaleString();
+            skillCostElement.textContent = skillCost.toLocaleString();
+            networkCostElement.textContent = networkCost.toLocaleString();
+            financeCostElement.textContent = financeCost.toLocaleString();
+            creativityLevelElement.textContent = creativityLevel;
+            aestheticsLevelElement.textContent = aestheticsLevel;
+            businessLevelElement.textContent = businessLevel;
+            skillLevelElement.textContent = skillLevel;
+            networkLevelElement.textContent = networkLevel;
+            financeLevelElement.textContent = financeLevel;
+            creativityEffectElement.textContent = creativityLevel * 5;
+            aestheticsEffectElement.textContent = (aestheticsLevel - 1) * 10;
+            businessEffectElement.textContent = (businessLevel - 1) * 10;
+            skillEffectElement.textContent = (skillLevel - 1) * 10;
+            networkEffectElement.textContent = networkLevel;
+            financeEffectElement.textContent = financeLevel;
+
+            upgradeCreativityButton.disabled = money < creativityCost;
+            upgradeAestheticsButton.disabled = money < aestheticsCost;
+            upgradeBusinessButton.disabled = money < businessCost;
+            upgradeSkillButton.disabled = money < skillCost;
+            upgradeNetworkButton.disabled = money < networkCost;
+            upgradeFinanceButton.disabled = money < financeCost;
+
+            const progress = (money / goal) * 100;
+            progressElement.style.width = `${progress}%`;
+            progressElement.textContent = `${progress.toFixed(2)}%`;
+
+            const expPercentage = (exp / expToNextLevel) * 100;
+            expProgressElement.style.width = `${expPercentage}%`;
+            expTextElement.textContent = `${exp.toFixed(0)} / ${expToNextLevel} XP`;
+
+            const baseIncome = 0.01;
+            const businessMultiplier = 1 + (businessLevel - 1) * 0.1;
+            const levelMultiplier = 1 + (level - 1) * 0.02;
+            const financeMultiplier = 1 + (financeLevel - 1) * 0.01;
+            const incomePerSecond = followers * baseIncome * businessMultiplier * levelMultiplier * financeMultiplier;
+            incomePerSecondElement.textContent = incomePerSecond.toFixed(2);
+
+            if (money >= goal) {
+                alert('恭喜你达成游戏目标，成为亿万富翁！');
+            }
+
+            checkAchievements();
+        }
+
+        function addLog(message) {
+            const p = document.createElement('p');
+            p.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logElement.insertBefore(p, logElement.firstChild);
+            if (logElement.children.length > 20) {
+                logElement.removeChild(logElement.lastChild);
+            }
+        }
+
+        function earnMoney() {
+            const baseIncome = 0.01;
+            const businessMultiplier = 1 + (businessLevel - 1) * 0.1;
+            const levelMultiplier = 1 + (level - 1) * 0.02;
+            const financeMultiplier = 1 + (financeLevel - 1) * 0.01;
+            const earning = followers * baseIncome * businessMultiplier * levelMultiplier * financeMultiplier;
+            money += earning;
+            updateDisplay();
+        }
+
+        function gainFollowers() {
+            const newFollowers = networkLevel;
+            followers += newFollowers;
+            updateDisplay();
+        }
+
+        function post() {
+            const baseFollowers = creativityLevel * 5;
+            const qualityMultiplier = 1 + (aestheticsLevel - 1) * 0.1;
+            const newFollowers = Math.floor(baseFollowers * qualityMultiplier);
+            followers += newFollowers;
+            followerGainElement.textContent = `+${newFollowers.toLocaleString()}`;
+            setTimeout(() => {
+                followerGainElement.textContent = '';
+            }, 3000);
+            gainExp(newFollowers * (1 + (skillLevel - 1) * 0.1));
+            updateDisplay();
+        }
+
+        function upgradeCreativity() {
+            if (money >= creativityCost) {
+                money -= creativityCost;
+                creativityLevel++;
+                creativityCost = Math.floor(creativityCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function upgradeAesthetics() {
+            if (money >= aestheticsCost) {
+                money -= aestheticsCost;
+                aestheticsLevel++;
+                aestheticsCost = Math.floor(aestheticsCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function upgradeBusiness() {
+            if (money >= businessCost) {
+                money -= businessCost;
+                businessLevel++;
+                businessCost = Math.floor(businessCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function upgradeSkill() {
+            if (money >= skillCost) {
+                money -= skillCost;
+                skillLevel++;
+                skillCost = Math.floor(skillCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function upgradeNetwork() {
+            if (money >= networkCost) {
+                money -= networkCost;
+                networkLevel++;
+                networkCost = Math.floor(networkCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function upgradeFinance() {
+            if (money >= financeCost) {
+                money -= financeCost;
+                financeLevel++;
+                financeCost = Math.floor(financeCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function gainExp(amount) {
+            exp += amount;
+            while (exp >= expToNextLevel) {
+                exp -= expToNextLevel;
+                level++;
+                expToNextLevel = Math.floor(expToNextLevel * 1.2);
+                addLog(`恭喜你升级了！现在你的等级是 ${level}。`);
+            }
+            updateDisplay();
+        }
+
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!achievement.unlocked && achievement.condition()) {
+                    achievement.unlocked = true;
+                    const achievementElement = document.createElement('div');
+                    achievementElement.className = 'achievement unlocked';
+                    achievementElement.textContent = achievement.name;
+                    achievementsElement.appendChild(achievementElement);
+                    addLog(`解锁成就：${achievement.name} - ${achievement.description}`);
+                }
+            });
+        }
+
+        function triggerRandomEvent() {
+            const events = [
+                { title: "热门话题", description: "你的一篇帖子意外走红，获得大量新粉丝！", effect: () => { followers += Math.floor(followers * 0.1); } },
+                { title: "灵感枯竭", description: "你遇到了创作瓶颈，损失了一些粉丝。", effect: () => { followers -= Math.floor(followers * 0.05); } },
+                { title: "品牌合作", description: "一个大品牌邀请你进行合作，获得可观收入！", effect: () => { money += Math.floor(followers * 0.2); } },
+                { title: "网络争议", description: "你的一条评论引发争议，损失了一些粉丝。", effect: () => { followers -= Math.floor(followers * 0.03); } },
+                { title: "创意爆发", description: "你想出了一个绝妙的创意，创意等级大幅提升！", effect: () => { creativityLevel += 1; } }
+            ];
+
+            const event = events[Math.floor(Math.random() * events.length)];
+            eventTitle.textContent = event.title;
+            eventDescription.textContent = event.description;
+            eventPopup.style.display = 'block';
+            event.effect();
+            addLog(`${event.title}: ${event.description}`);
+            updateDisplay();
+        }
+
+        eventButton.addEventListener('click', () => {
+            eventPopup.style.display = 'none';
+        });
+
+        postButton.addEventListener('click', post);
+        upgradeCreativityButton.addEventListener('click', upgradeCreativity);
+        upgradeAestheticsButton.addEventListener('click', upgradeAesthetics);
+        upgradeBusinessButton.addEventListener('click', upgradeBusiness);
+        upgradeSkillButton.addEventListener('click', upgradeSkill);
+        upgradeNetworkButton.addEventListener('click', upgradeNetwork);
+        upgradeFinanceButton.addEventListener('click', upgradeFinance);
+
+        setInterval(earnMoney, 1000);
+        setInterval(gainFollowers, 1000);
+        setInterval(triggerRandomEvent, 60000);
+        updateDisplay();
+    </script>
+</body>
+</html>
